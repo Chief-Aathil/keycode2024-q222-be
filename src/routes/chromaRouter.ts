@@ -24,7 +24,8 @@ vectorStore = new Chroma(embeddings, {
 
 chromaRouter.get("/", async (req, res) => {
     const input = req.query.input as string
-  let result = await get("1", input);
+    const userId = req.query.userId as string
+  let result = await get(userId, input);
   res.send(result);
 });
 
