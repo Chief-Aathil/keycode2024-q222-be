@@ -77,6 +77,8 @@ const generateResponse = async (userId: string, prompt: string): Promise<string>
   }
 };
 
+const userPrompts: string[] = []
+
 export async function get(userId: string, question: string) {
     console.log("#####################################")
     const keywords = await generateResponse(userId, question)
@@ -84,7 +86,7 @@ export async function get(userId: string, question: string) {
     const prompt = await pull<ChatPromptTemplate>("rlm/rag-prompt");
     const llm = new ChatOpenAI({
         apiKey,
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         temperature: 0
     });
 
@@ -94,36 +96,64 @@ export async function get(userId: string, question: string) {
         llm,
         prompt,
         outputParser: new StringOutputParser(),
+
     });
 
 
     // const retrievedDocs = await retriever.invoke("dell laptop");
 
-    const retrievedDocs = await queryChroma(keywords, 20);
+    const retrievedDocs = await queryChroma(keywords, 100);
     const docs: Document[] = []
-    for (let i = 0; i < retrievedDocs.documents.length; i++) {
+
+    console.log("Got data from Chroma")
+
+
+    for (let i = 0; i < retrievedDocs.documents[0].length; i++) {
         docs.push(new Document({
-            id: retrievedDocs.ids[i] as unknown as string,
-            pageContent: retrievedDocs.documents[i] as unknown as string,
-            metadata: retrievedDocs.metadatas[i],
+            id: retrievedDocs.ids[0][i] as unknown as string,
+            pageContent: retrievedDocs.documents[0][i] as unknown as string,
+            // metadata: retrievedDocs.metadaec[i],
         }));
     }
 
-    console.log("#####################################")
-    // console.log(retrievedDocs)
-    const result = await ragChain.invoke({
-        question: `From the data provided filter the relevant JSON content without changing it that satisfy the keywords ${keywords}
-        The output should be in the format of JSON as
-        {
-            "products": [
-                <JSON for product 1>,
-                <JSON for product 2>,
-                    ...
-            ]
+    const docsWithoutURL = docs.map((doc) => {
+        try {
+            // Parse the JSON string into an object
+            const pageContentObject = JSON.parse(doc.pageContent);
+
+            delete pageContentObject.url;
+            delete pageContentObject.imgUrl;
+            delete pageContentObject.type;
+
+
+            pageContentObject.id = doc.id
+
+            // Create a new Document with the modified content
+            return new Document({ ...doc, pageContent: JSON.stringify(pageContentObject) });
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            // Return the original document if there's an error
+            return doc;
         }
-        `,
-        context:  docs,
     });
-    return result
+
+    userPrompts.push(question)
+    const q = `From the data provided, return the ids of the items that satisfy the questions before ${JSON.stringify(userPrompts)}. only
+            Expected OUTPUT: ["<id1>", "<id2>
+                            if there are no IDs return []", ....]
+                                        `
+    console.log(q)
+
+    // console.log(retrievedDocs)
+    const ids = await ragChain.invoke({
+        question: q,
+        context:  docsWithoutURL,
+    });
+    console.log(ids)
+    const idsList = JSON.parse(ids) as string[]
+    console.log(idsList.length)
+    return {
+        "products": docs.filter(doc => idsList.includes(doc.id!)).map(doc => JSON.parse(doc.pageContent))
+    }
 }
 

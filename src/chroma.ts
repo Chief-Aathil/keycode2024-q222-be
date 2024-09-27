@@ -1,9 +1,9 @@
 import { ChromaClient } from "chromadb";
-const client = new ChromaClient();
+const client = new ChromaClient({path: "https://9ef4-103-138-236-18.ngrok-free.app"});
 
 async function getCollection()  {
     return await client.getOrCreateCollection({
-        name: "my_collection",
+        name: "products",
     });
 }
 
@@ -17,7 +17,7 @@ export async function addDocument(ids: any[], documents: any[], metadatas: any[]
     })
 }
 
-export async function queryChroma(queryText: string, n: number) {
+export async function queryChroma(queryText: string, n: number = 10) {
     let collection = await getCollection();
     return await collection.query({
         queryTexts: queryText,
