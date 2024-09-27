@@ -8,13 +8,18 @@ const chromaRouter = express.Router();
 const embeddings = new OpenAIEmbeddings({
   model: "text-embedding-3-small",
 });
-const vectorStore = new Chroma(embeddings, {
-  collectionName: "a-test-collection",
+let vectorStore: any;
+try {
+vectorStore = new Chroma(embeddings, {
+  collectionName: "my_collection",
   url: "http://localhost:8000", // Optional, will default to this value
   collectionMetadata: {
     "hnsw:space": "cosine",
   }, // Optional, can be used to specify the distance method of the embedding space https://docs.trychroma.com/usage-guide#changing-the-distance-function
 });
+} catch (err) {
+    console.log(err)
+}
 chromaRouter.post('/add', async (req, res) => {
   try {
     const result = await addDocuments(req.body.documents, req.body.ids,vectorStore);
@@ -24,7 +29,7 @@ chromaRouter.post('/add', async (req, res) => {
   }
 });
 
-chromaRouter.get("/test", async (_req, res) => {
+chromaRouter.get("/get", async (_req, res) => {
   let result = await get(vectorStore);
   res.send(result);
 });
