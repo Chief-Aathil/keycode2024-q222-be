@@ -14,6 +14,7 @@ import { pull } from "langchain/hub";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import { Chroma } from "@langchain/community/vectorstores/chroma";
 
 const apiKey = process.env.OPENAI_API_KEY
 
@@ -40,10 +41,21 @@ export async function test() {
         chunkOverlap: 200,
     });
     const splits = await textSplitter.splitDocuments(docs);
-    const vectorStore = await MemoryVectorStore.fromDocuments(
+    const embeddings = new OpenAIEmbeddings({
+        model: "text-embedding-3-small",
+    });
+    
+    const vectorStore = new Chroma(embeddings, {
+        collectionName: "a-test-collection",
+        url: "http://localhost:8000", // Optional, will default to this value
+        collectionMetadata: {
+          "hnsw:space": "cosine",
+        }, // Optional, can be used to specify the distance method of the embedding space https://docs.trychroma.com/usage-guide#changing-the-distance-function
+      });
+    /*  await MemoryVectorStore.fromDocuments(
         splits,
         new OpenAIEmbeddings({apiKey })
-    );
+    );  */
 
     // Retrieve and generate using the relevant snippets of the blog.
     const retriever = vectorStore.asRetriever();
