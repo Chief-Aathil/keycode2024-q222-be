@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import express, { Request, Response } from "express";
 // import generateResponse from "./util/gpt.generateResponse";
 // import router from "./route/gpt.route";
@@ -12,16 +13,18 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_req: Request, res: Response) => {
     res.send("ok")
 });
 
-app.get("/test", (req: Request, res: Response) => {
- return  test();
+app.get("/test", async (_req: Request, res: Response) => {
+ let result = await test();
+  res.send(result);
 });
 
-app.get("/crawl", async (req: Request, res: Response) => {
-  return await crawl();
+app.get("/crawl", async (_req: Request, res: Response) => {
+ let result = await crawl();
+  res.send(result);
  });
 
 

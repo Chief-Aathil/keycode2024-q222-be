@@ -15,7 +15,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 
-const apiKey = ""
+const apiKey = process.env.OPENAI_API_KEY
 
 export async function test() {
 
@@ -61,11 +61,11 @@ export async function test() {
     });
 
 
-    const retrievedDocs = await retriever.invoke("Can you get the details of iphone 17 in JSON format");
+    const retrievedDocs = await retriever.invoke("Can you get the details of iphone 14 in JSON format");
     console.log("#####################################")
     console.log(retrievedDocs)
     const result = await ragChain.invoke({
-        question: "Can you get the details of iphone 17 in JSON format",
+        question: "Can you get the details of iphone 14 in JSON format",
         context: retrievedDocs,
     });
     console.log(result);
