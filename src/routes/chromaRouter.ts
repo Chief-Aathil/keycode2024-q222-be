@@ -3,6 +3,7 @@ import { addDocuments } from '../../chromaService';
 import { Chroma } from '@langchain/community/vectorstores/chroma';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { get } from '../rag';
+import { addDocument } from '../chroma';
 
 const chromaRouter = express.Router();
 const embeddings = new OpenAIEmbeddings({
@@ -20,14 +21,6 @@ vectorStore = new Chroma(embeddings, {
 } catch (err) {
     console.log(err)
 }
-chromaRouter.post('/add', async (req, res) => {
-  try {
-    const result = await addDocuments(req.body.documents, req.body.ids,vectorStore);
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 chromaRouter.get("/", async (req, res) => {
     const input = req.query.input as string
@@ -35,6 +28,13 @@ chromaRouter.get("/", async (req, res) => {
   res.send(result);
 });
 
+chromaRouter.post("/add-documents", async (req, res) => {
+  let { ids, metadats, documents } = req.body;
+  documents = documents.map((doc: Object) => JSON.stringify(doc));
+  await addDocument( ids, documents,  metadats)
+  res.setHeader("Content-Type", "application/json");
+  res.end()
+});
 
 
 export default chromaRouter;
