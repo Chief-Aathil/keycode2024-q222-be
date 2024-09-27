@@ -11,15 +11,18 @@ import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { BufferMemory, ChatMessageHistory } from "langchain/memory";
 
 const apiKey = process.env.OPENAI_API_KEY
+const chains: { [key: string]: ConversationChain } = {};
+const prompts: { [key: string]: string[] } = {};
+
 
 
 export let systemMessage = `You find the intents from a prompt and convert to a query that can be passed to a vector database that contains lots of data for a product with ecommerce platforms with link.
 
 PROMPT: "I want to buy a gift for my son's 23rd birthday"
-EXPECTED OUTPUT:  "mobile phone, badminton racket, cricket bat"
+EXPECTED OUTPUT:  "[mobile phone, badminton racket, cricket bat]"
 
 PROMPT: "I want to buy a gift my wife for wedding anniversary"
-EXPECTED OUTPUT:  "Rossess ,earrings, bangles, photo frame"
+EXPECTED OUTPUT:  "[Rossess, earrings, bangles, photo frame]"
 
 Note : only give the expected output as json array`;
 export const changeSystemMessage = (newSystemMessage: string) => {
@@ -51,8 +54,6 @@ const createChain = (): ConversationChain => {
   return chain;
 }
 
-const chains: { [key: string]: ConversationChain } = {};
-
 export const resetHistory = (userId: string) => {
     const chain = chains[userId];
     if (!chain) {
@@ -77,7 +78,6 @@ const generateResponse = async (userId: string, prompt: string): Promise<string>
   }
 };
 
-const userPrompts: string[] = []
 
 export async function get(userId: string, question: string) {
     console.log("#####################################")
@@ -139,7 +139,16 @@ export async function get(userId: string, question: string) {
         }
     });
 
+    let userPrompts = prompts[userId];
+
+    if (!userPrompts) {
+        console.log("Creating new List for ", userId, " ", userPrompts)
+        userPrompts = []
+        prompts[userId] = userPrompts ;
+    }
+
     userPrompts.push(question)
+
     const q = `${JSON.stringify(userPrompts)} This array contains the chat history till now in order.
     From the data provided, return the ids of the items that satisfy the questions or the keywords ${keywords}. Return minimum of 10 items.
             Expected OUTPUT: ["<id1>", "<id2>
