@@ -141,7 +141,7 @@ export async function get(userId: string, question: string) {
 
     userPrompts.push(question)
     const q = `${JSON.stringify(userPrompts)} This array contains the chat history till now in order.
-    From the data provided, return the ids of the items that satisfy the questions. Return minimum of 10 items.
+    From the data provided, return the ids of the items that satisfy the questions or the keywords ${keywords}. Return minimum of 10 items.
             Expected OUTPUT: ["<id1>", "<id2>
                             if there are no IDs return []", ....]
                                         `

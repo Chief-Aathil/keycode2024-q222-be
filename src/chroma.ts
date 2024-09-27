@@ -1,4 +1,5 @@
 import { ChromaClient } from "chromadb";
+import *  as crypto from "crypto"
 const client = new ChromaClient();
 
 async function getCollection()  {
