@@ -2,6 +2,7 @@ import express from 'express';
 import { addDocuments } from '../../chromaService';
 import { Chroma } from '@langchain/community/vectorstores/chroma';
 import { OpenAIEmbeddings } from '@langchain/openai';
+import { get } from '../rag';
 
 const chromaRouter = express.Router();
 const embeddings = new OpenAIEmbeddings({
@@ -22,5 +23,12 @@ chromaRouter.post('/add', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+chromaRouter.get("/test", async (_req, res) => {
+  let result = await get(vectorStore);
+  res.send(result);
+});
+
+
 
 export default chromaRouter;

@@ -5,7 +5,6 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { crawl } from "./firecrawl";
-import { test } from "./rag";
 import chromaRouter from "./routes/chromaRouter";
 
 const app = express();
@@ -17,10 +16,7 @@ app.get("/", (_req: Request, res: Response) => {
   res.send("ok");
 });
 
-app.get("/test", async (_req: Request, res: Response) => {
-  let result = await test();
-  res.send(result);
-});
+
 
 app.get("/crawl", async (_req: Request, res: Response) => {
   let result = await crawl();
