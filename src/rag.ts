@@ -142,7 +142,6 @@ export async function get(userId: string, question: string) {
     let userPrompts = prompts[userId];
 
     if (!userPrompts) {
-        console.log("Creating new List for ", userId, " ", userPrompts)
         userPrompts = []
         prompts[userId] = userPrompts ;
     }
@@ -161,11 +160,30 @@ export async function get(userId: string, question: string) {
         question: q,
         context:  docsWithoutURL,
     });
+
+    const q2 = `Based on below user prompts give me 3 potential follow up questions that user might ask.
+        USER_PROMTS: """ ${JSON.stringify(userPrompts)}  """
+        Return data as array ["<followUpQn1>", "<followUpQn2>"]
+        From the context the selected ids are ${JSON.stringify(ids)}
+        DO NOT wrap output with \`\`\`
+        `
+
+    console.log("q1: ", q)
+    console.log("q2: ", q2)
+
+    const followUpQns = await ragChain.invoke({
+        question: q2,
+        context:  docsWithoutURL,
+    });
+    // console.log(q)
+
     console.log(ids)
     const idsList = JSON.parse(ids) as string[]
     console.log("Ids: " + idsList.length)
+    console.log(followUpQns)
     return {
-        "products": docs.filter(doc => idsList.includes(doc.id!)).map(doc => JSON.parse(doc.pageContent))
+        "products": docs.filter(doc => idsList.includes(doc.id!)).map(doc => JSON.parse(doc.pageContent)),
+        "followUpQns": JSON.parse(followUpQns)
     }
 }
 
