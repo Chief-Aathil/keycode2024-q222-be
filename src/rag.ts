@@ -102,10 +102,9 @@ export async function get(userId: string, question: string) {
 
     // const retrievedDocs = await retriever.invoke("dell laptop");
 
-    const retrievedDocs = await queryChroma(keywords, 100);
+    const retrievedDocs = await queryChroma(keywords, 200);
     const docs: Document[] = []
 
-    console.log("Got data from Chroma")
 
 
     for (let i = 0; i < retrievedDocs.documents[0].length; i++) {
@@ -115,6 +114,8 @@ export async function get(userId: string, question: string) {
             // metadata: retrievedDocs.metadaec[i],
         }));
     }
+
+    console.log("Got data from Chroma: ", docs.length)
 
     const docsWithoutURL = docs.map((doc) => {
         try {
@@ -138,7 +139,8 @@ export async function get(userId: string, question: string) {
     });
 
     userPrompts.push(question)
-    const q = `From the data provided, return the ids of the items that satisfy the questions before ${JSON.stringify(userPrompts)}. only
+    const q = `${JSON.stringify(userPrompts)} This array contains the chat history till now in order.
+    From the data provided, return the ids of the items that satisfy the questions. Return minimum of 10 items.
             Expected OUTPUT: ["<id1>", "<id2>
                             if there are no IDs return []", ....]
                                         `
@@ -151,7 +153,7 @@ export async function get(userId: string, question: string) {
     });
     console.log(ids)
     const idsList = JSON.parse(ids) as string[]
-    console.log(idsList.length)
+    console.log("Ids: " + idsList.length)
     return {
         "products": docs.filter(doc => idsList.includes(doc.id!)).map(doc => JSON.parse(doc.pageContent))
     }
