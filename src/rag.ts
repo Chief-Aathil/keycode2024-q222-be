@@ -82,6 +82,7 @@ const userPrompts: string[] = []
 export async function get(userId: string, question: string) {
     console.log("#####################################")
     const keywords = await generateResponse(userId, question)
+    // return keywords
     console.log(`Got keywords: ${keywords}`)
     const prompt = await pull<ChatPromptTemplate>("rlm/rag-prompt");
     const llm = new ChatOpenAI({
@@ -144,7 +145,7 @@ export async function get(userId: string, question: string) {
             Expected OUTPUT: ["<id1>", "<id2>
                             if there are no IDs return []", ....]
                                         `
-    console.log(q)
+    // console.log(q)
 
     // console.log(retrievedDocs)
     const ids = await ragChain.invoke({

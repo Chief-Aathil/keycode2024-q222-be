@@ -1,5 +1,5 @@
 import { ChromaClient } from "chromadb";
-const client = new ChromaClient({path: "https://9ef4-103-138-236-18.ngrok-free.app"});
+const client = new ChromaClient();
 
 async function getCollection()  {
     return await client.getOrCreateCollection({
@@ -12,7 +12,6 @@ export async function addDocument(ids: any[], documents: any[], metadatas: any[]
     const uuids = generateUUIDs(documents.length)
     await collection.add({
         ids: uuids,
-        metadatas,
         documents,
     })
 }
