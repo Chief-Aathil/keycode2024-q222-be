@@ -29,8 +29,9 @@ chromaRouter.post('/add', async (req, res) => {
   }
 });
 
-chromaRouter.get("/get", async (_req, res) => {
-  let result = await get(vectorStore);
+chromaRouter.get("/", async (req, res) => {
+    const input = req.query.input as string
+  let result = await get("1", input);
   res.send(result);
 });
 

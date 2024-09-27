@@ -23,7 +23,7 @@ app.get("/crawl", async (_req: Request, res: Response) => {
   res.send(result);
 });
 
-app.use("/chroma",chromaRouter );
+app.use("/api/v1/shopGPT",chromaRouter );
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
