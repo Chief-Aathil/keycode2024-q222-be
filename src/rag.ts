@@ -178,12 +178,22 @@ export async function get(userId: string, question: string) {
     // console.log(q)
 
     console.log(ids)
-    const idsList = JSON.parse(ids) as string[]
-    console.log("Ids: " + idsList.length)
-    console.log(followUpQns)
-    return {
+    try {
+      const idsList = JSON.parse(ids) as string[]
+      console.log("Ids: " + idsList.length)
+      console.log(followUpQns)
+      return {
         "products": docs.filter(doc => idsList.includes(doc.id!)).map(doc => JSON.parse(doc.pageContent)),
         "followUpQns": JSON.parse(followUpQns)
+      }
     }
+    catch(error){
+      console.log("$$$$$$ Error retrieving Ids")
+      return {
+        "products" : docs.filter(doc => true).map(doc => JSON.parse(doc.pageContent)).slice(0,30),
+        "followUpQns" : []
+      }
+    }
+    
 }
 
